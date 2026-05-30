@@ -73,11 +73,14 @@ function objCounts(objs: string[]) {
   return Object.entries(counts);
 }
 
+type Section = "Overview" | "Live heatmap" | "Predictive analytics" | "Traffic monitoring" | "Risk forecasting" | "Smart alerts" | "GIS layers";
+
 function Dashboard() {
   const [alerts, setAlerts] = useState<Alert[]>(seedAlerts);
   const [now, setNow] = useState(new Date());
   const [liveData, setLiveData] = useState<LiveData | null>(null);
   const [apiOnline, setApiOnline] = useState(false);
+  const [activeSection, setActiveSection] = useState<Section>("Overview");
   const prevAlerts = useRef<string[]>([]);
 
   // Clock
@@ -202,19 +205,22 @@ function Dashboard() {
       <div className="grid gap-6 px-6 py-6 lg:grid-cols-[260px_1fr_320px]">
         {/* Left sidebar */}
         <aside className="space-y-2">
-          {[
-            { i: Gauge, k: "Overview", active: true },
-            { i: MapPin, k: "Live heatmap" },
-            { i: Brain, k: "Predictive analytics" },
-            { i: Car, k: "Traffic monitoring" },
-            { i: TrendingUp, k: "Risk forecasting" },
-            { i: Bell, k: "Smart alerts" },
-            { i: Layers, k: "GIS layers" },
-          ].map(({ i: Icon, k, active }) => (
+          {(
+            [
+              { i: Gauge, k: "Overview" },
+              { i: MapPin, k: "Live heatmap" },
+              { i: Brain, k: "Predictive analytics" },
+              { i: Car, k: "Traffic monitoring" },
+              { i: TrendingUp, k: "Risk forecasting" },
+              { i: Bell, k: "Smart alerts" },
+              { i: Layers, k: "GIS layers" },
+            ] as { i: React.ElementType; k: Section }[]
+          ).map(({ i: Icon, k }) => (
             <button
               key={k}
+              onClick={() => setActiveSection(k)}
               className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition ${
-                active
+                activeSection === k
                   ? "bg-primary/15 text-primary border border-primary/30"
                   : "text-muted-foreground hover:bg-card hover:text-foreground"
               }`}
@@ -240,99 +246,142 @@ function Dashboard() {
 
         {/* Main content */}
         <main className="space-y-6">
-          {/* KPI cards */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {kpis.map((s) => (
-              <div key={s.k} className="rounded-xl border border-border bg-card/60 p-4 backdrop-blur">
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  {s.k}
-                  <s.icon className={`h-4 w-4 ${s.tone}`} />
-                </div>
-                <div className="mt-2 font-[Space_Grotesk] text-3xl font-bold">{s.v}</div>
-                <div className="mt-1 truncate text-xs text-muted-foreground">{s.sub}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* Heatmap */}
-          <Heatmap className="h-120 w-full" />
-
-          {/* Charts */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border border-border bg-card/60 p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground">24h Risk forecast</div>
-                  <div className="mt-1 font-[Space_Grotesk] text-lg font-semibold">Average risk score</div>
-                </div>
-                <CloudRain className="h-4 w-4 text-secondary" />
-              </div>
-              <div className="mt-4 h-55">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={trend}>
-                    <defs>
-                      <linearGradient id="r" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stopColor="oklch(0.72 0.18 235)" stopOpacity={0.7} />
-                        <stop offset="100%" stopColor="oklch(0.72 0.18 235)" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid stroke="oklch(0.28 0.04 265)" strokeDasharray="3 3" />
-                    <XAxis dataKey="h" stroke="oklch(0.68 0.03 255)" fontSize={11} />
-                    <YAxis stroke="oklch(0.68 0.03 255)" fontSize={11} />
-                    <Tooltip contentStyle={{ background: "oklch(0.19 0.04 265)", border: "1px solid oklch(0.28 0.04 265)", borderRadius: 8 }} />
-                    <Area dataKey="risk" stroke="oklch(0.72 0.18 235)" fill="url(#r)" strokeWidth={2} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
+          {/* Section title */}
+          {activeSection !== "Overview" && (
+            <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
+              <span className="h-px flex-1 bg-border" />
+              {activeSection}
+              <span className="h-px flex-1 bg-border" />
             </div>
-
-            <div className="rounded-xl border border-border bg-card/60 p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs uppercase tracking-wider text-muted-foreground">Incidents by hour</div>
-                  <div className="mt-1 font-[Space_Grotesk] text-lg font-semibold">Reported events</div>
-                </div>
-                <TrendingUp className="h-4 w-4 text-accent" />
-              </div>
-              <div className="mt-4 h-55">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={trend}>
-                    <CartesianGrid stroke="oklch(0.28 0.04 265)" strokeDasharray="3 3" />
-                    <XAxis dataKey="h" stroke="oklch(0.68 0.03 255)" fontSize={11} />
-                    <YAxis stroke="oklch(0.68 0.03 255)" fontSize={11} />
-                    <Tooltip contentStyle={{ background: "oklch(0.19 0.04 265)", border: "1px solid oklch(0.28 0.04 265)", borderRadius: 8 }} />
-                    <Bar dataKey="incidents" fill="oklch(0.65 0.21 295)" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-
-          {/* Hotspots table */}
-          <div className="rounded-xl border border-border bg-card/60">
-            <div className="flex items-center justify-between border-b border-border p-5">
-              <div>
-                <div className="text-xs uppercase tracking-wider text-muted-foreground">Top predicted hotspots</div>
-                <div className="mt-1 font-[Space_Grotesk] text-lg font-semibold">Next 60 minutes</div>
-              </div>
-              <Button variant="outline" size="sm">Export report</Button>
-            </div>
-            <div className="divide-y divide-border">
-              {hotspots.map((h) => (
-                <div key={h.name} className="flex items-center gap-4 px-5 py-4">
-                  <div className="grid h-10 w-10 place-items-center rounded-lg bg-background/60">
-                    <MapPin className="h-4 w-4 text-primary" />
+          )}
+          {/* KPI cards — visible on Overview, Traffic, Risk forecasting */}
+          {["Overview", "Traffic monitoring", "Risk forecasting"].includes(activeSection) && (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {kpis.map((s) => (
+                <div key={s.k} className="rounded-xl border border-border bg-card/60 p-4 backdrop-blur">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    {s.k}<s.icon className={`h-4 w-4 ${s.tone}`} />
                   </div>
-                  <div className="flex-1">
-                    <div className="font-medium">{h.name}</div>
-                    <div className="text-xs text-muted-foreground">{h.cause}</div>
-                  </div>
-                  <span className={`rounded-full border px-2 py-0.5 text-xs ${riskColor(h.type)}`}>{h.type}</span>
-                  <div className="w-12 text-right font-[Space_Grotesk] text-xl font-bold">{h.score}</div>
+                  <div className="mt-2 font-[Space_Grotesk] text-3xl font-bold">{s.v}</div>
+                  <div className="mt-1 truncate text-xs text-muted-foreground">{s.sub}</div>
                 </div>
               ))}
             </div>
-          </div>
+          )}
+
+          {/* Heatmap */}
+          {["Overview", "Live heatmap", "GIS layers"].includes(activeSection) && (
+            <div>
+              {activeSection === "GIS layers" && (
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {["Accident clusters", "Speed violations", "Weather overlay", "CCTV zones", "Traffic flow"].map((layer) => (
+                    <button key={layer} className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/20 transition">
+                      {layer}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <Heatmap className={`w-full ${activeSection === "Live heatmap" || activeSection === "GIS layers" ? "h-150" : "h-120"}`} />
+            </div>
+          )}
+
+          {/* Charts */}
+          {["Overview", "Predictive analytics", "Risk forecasting"].includes(activeSection) && (
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="rounded-xl border border-border bg-card/60 p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground">24h Risk forecast</div>
+                    <div className="mt-1 font-[Space_Grotesk] text-lg font-semibold">Average risk score</div>
+                  </div>
+                  <CloudRain className="h-4 w-4 text-secondary" />
+                </div>
+                <div className="mt-4 h-55">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={trend}>
+                      <defs>
+                        <linearGradient id="r" x1="0" x2="0" y1="0" y2="1">
+                          <stop offset="0%" stopColor="oklch(0.72 0.18 235)" stopOpacity={0.7} />
+                          <stop offset="100%" stopColor="oklch(0.72 0.18 235)" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid stroke="oklch(0.28 0.04 265)" strokeDasharray="3 3" />
+                      <XAxis dataKey="h" stroke="oklch(0.68 0.03 255)" fontSize={11} />
+                      <YAxis stroke="oklch(0.68 0.03 255)" fontSize={11} />
+                      <Tooltip contentStyle={{ background: "oklch(0.19 0.04 265)", border: "1px solid oklch(0.28 0.04 265)", borderRadius: 8 }} />
+                      <Area dataKey="risk" stroke="oklch(0.72 0.18 235)" fill="url(#r)" strokeWidth={2} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+              <div className="rounded-xl border border-border bg-card/60 p-5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-xs uppercase tracking-wider text-muted-foreground">Incidents by hour</div>
+                    <div className="mt-1 font-[Space_Grotesk] text-lg font-semibold">Reported events</div>
+                  </div>
+                  <TrendingUp className="h-4 w-4 text-accent" />
+                </div>
+                <div className="mt-4 h-55">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={trend}>
+                      <CartesianGrid stroke="oklch(0.28 0.04 265)" strokeDasharray="3 3" />
+                      <XAxis dataKey="h" stroke="oklch(0.68 0.03 255)" fontSize={11} />
+                      <YAxis stroke="oklch(0.68 0.03 255)" fontSize={11} />
+                      <Tooltip contentStyle={{ background: "oklch(0.19 0.04 265)", border: "1px solid oklch(0.28 0.04 265)", borderRadius: 8 }} />
+                      <Bar dataKey="incidents" fill="oklch(0.65 0.21 295)" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Hotspots table */}
+          {["Overview", "Predictive analytics", "Traffic monitoring"].includes(activeSection) && (
+            <div className="rounded-xl border border-border bg-card/60">
+              <div className="flex items-center justify-between border-b border-border p-5">
+                <div>
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground">Top predicted hotspots</div>
+                  <div className="mt-1 font-[Space_Grotesk] text-lg font-semibold">Next 60 minutes</div>
+                </div>
+                <Button variant="outline" size="sm">Export report</Button>
+              </div>
+              <div className="divide-y divide-border">
+                {hotspots.map((h) => (
+                  <div key={h.name} className="flex items-center gap-4 px-5 py-4">
+                    <div className="grid h-10 w-10 place-items-center rounded-lg bg-background/60">
+                      <MapPin className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium">{h.name}</div>
+                      <div className="text-xs text-muted-foreground">{h.cause}</div>
+                    </div>
+                    <span className={`rounded-full border px-2 py-0.5 text-xs ${riskColor(h.type)}`}>{h.type}</span>
+                    <div className="w-12 text-right font-[Space_Grotesk] text-xl font-bold">{h.score}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Smart alerts expanded view */}
+          {activeSection === "Smart alerts" && (
+            <div className="space-y-3">
+              {alerts.map((a) => (
+                <div key={a.id} className="rounded-xl border border-border bg-card/60 p-4">
+                  <div className="flex items-center justify-between">
+                    <span className={`text-xs font-medium uppercase tracking-wider ${
+                      a.level === "critical" ? "text-destructive" : a.level === "high" ? "text-orange-400" : "text-yellow-400"
+                    }`}>{a.level}</span>
+                    <span className="text-xs text-muted-foreground">{a.time}</span>
+                  </div>
+                  <div className="mt-1 font-medium">{a.title}</div>
+                  <div className="mt-1 text-sm text-muted-foreground">{a.desc}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </main>
 
         {/* Right sidebar */}
