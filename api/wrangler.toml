@@ -7,4 +7,4 @@ compatibility_date = "2024-09-23"
 # Replace the id below with the one printed in your terminal
 [[kv_namespaces]]
 binding = "STATE"
-id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+id = "5954504df3fa40bcbe0a213aaaefeede"
