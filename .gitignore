@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+*.egg-info/
+dist/
+build/
+
+# Runtime files
+shared_state.json
+hazard_log.csv
+crash_image.jpg
+
+# Node
+node_modules/
+.next/
+out/
+
+# Large binary files (download separately)
+Road_Safety/road safety/videos/
+Road_Safety/road safety/yolov8n.pt
+
+# macOS
+__MACOSX/
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

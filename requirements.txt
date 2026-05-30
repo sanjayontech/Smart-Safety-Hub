@@ -1,0 +1,9 @@
+flask
+flask-cors
+opencv-python
+ultralytics
+streamlit
+pandas
+twilio
+python-dotenv
+numpy
