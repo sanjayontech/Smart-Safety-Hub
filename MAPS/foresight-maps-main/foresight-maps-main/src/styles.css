@@ -107,6 +107,11 @@
   --gradient-bg: radial-gradient(ellipse at top, oklch(0.20 0.06 265) 0%, oklch(0.10 0.04 265) 60%);
   --shadow-glow: 0 0 40px oklch(0.72 0.18 235 / 0.35);
   --shadow-elegant: 0 20px 60px -20px oklch(0.05 0.04 265 / 0.7);
+
+  /* Figma component color tokens */
+  --green: #00ff88;
+  --orange: #ff8c00;
+  --red: #ff3b3b;
 }
 
 .dark {
