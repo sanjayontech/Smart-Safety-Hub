@@ -1,0 +1,10 @@
+name = "smart-safety-api"
+main = "worker.js"
+compatibility_date = "2024-09-23"
+
+# KV namespace for storing live detection state
+# After running: npx wrangler kv namespace create STATE
+# Replace the id below with the one printed in your terminal
+[[kv_namespaces]]
+binding = "STATE"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
