@@ -7,3 +7,4 @@ pandas
 twilio
 python-dotenv
 numpy
+pytest

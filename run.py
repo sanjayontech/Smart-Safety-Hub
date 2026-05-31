@@ -12,6 +12,7 @@ ROAD_SAFETY = os.path.join(BASE, "Road_Safety", "road safety")
 ACCIDENT_PROJECT = os.path.join(BASE, "Accident_Project", "Accident_Project")
 EMERGENCY_ALERT = os.path.join(BASE, "Emergency_Alert")
 MAPS = os.path.join(BASE, "MAPS", "foresight-maps-main", "foresight-maps-main")
+CRASH_DETECTION = os.path.join(BASE, "Crash_Detection")
 
 MENU = """
 ╔══════════════════════════════════════════════╗
@@ -25,6 +26,8 @@ MENU = """
 ║  4. Accident API Server    (Flask :5000)    ║
 ║  5. Emergency Alert System (Twilio)         ║
 ║  6. Webcam Crash Capture   (press C/Q)      ║
+║  8. Crash Detection Demo   (IMU engine)     ║
+║  9. Crash Detection Tests  (pytest)         ║
 ║                                             ║
 ║  Frontend:                                  ║
 ║  7. Predictive Map Dashboard (React)        ║
@@ -54,7 +57,7 @@ def check_env():
 
 def main():
     print(MENU)
-    choice = input("Select module [0-7]: ").strip()
+    choice = input("Select module [0-9]: ").strip()
 
     if choice == "1":
         print("\nStarting Road Safety Dashboard (Streamlit)...")
@@ -114,12 +117,20 @@ The dashboard shows the predictive accident heatmap,
 risk scores, hotspot table, and live alerts.
         """)
 
+    elif choice == "8":
+        print("\nStarting Crash Detection Engine demo (press Ctrl+C to stop)...\n")
+        run([sys.executable, "demo.py"], CRASH_DETECTION)
+
+    elif choice == "9":
+        print("\nRunning Crash Detection test suite...\n")
+        run([sys.executable, "-m", "pytest", "tests/test_detection.py", "-v"], CRASH_DETECTION)
+
     elif choice == "0":
         print("Goodbye!")
         sys.exit(0)
 
     else:
-        print("Invalid choice. Please enter a number between 0 and 7.")
+        print("Invalid choice. Please enter a number between 0 and 9.")
 
 
 if __name__ == "__main__":
